@@ -10,6 +10,7 @@
             <div class="mt-1 relative rounded-md shadow-md">
               <input
                 v-model="ticker"
+                @input="tickerAdded = false"
                 @keydown.enter="addTicker"
                 type="text"
                 name="wallet"
