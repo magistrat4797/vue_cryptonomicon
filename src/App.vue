@@ -10,7 +10,7 @@
             <div class="mt-1 relative rounded-md shadow-md">
               <input
                 v-model="ticker"
-                @keydown.enter="addcurrentTicker"
+                @keydown.enter="addTicker"
                 type="text"
                 name="wallet"
                 id="wallet"
@@ -18,10 +18,35 @@
                 placeholder="Например DOGE"
               />
             </div>
+            <!-- <div class="flex bg-white shadow-md p-1 rounded-md flex-wrap">
+              <span
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+              >
+                BTC
+              </span>
+              <span
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+              >
+                DOGE
+              </span>
+              <span
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+              >
+                BCH
+              </span>
+              <span
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+              >
+                CHD
+              </span>
+            </div> -->
+            <div v-if="tickerAdded" class="text-sm text-red-600">
+              Такой тикер уже добавлен
+            </div>
           </div>
         </div>
         <button
-          @click="addcurrentTicker"
+          @click="addTicker"
           type="button"
           class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
@@ -137,13 +162,32 @@ export default {
     return {
       ticker: "",
       tickers: [],
+      tickerAdded: false,
       sel: null,
       graph: [],
     };
   },
 
   methods: {
-    addcurrentTicker() {
+    subscribeToUpdates(tickerName) {
+      setInterval(async () => {
+        const apiKey =
+          "29bc7459d2f89890c58f322e34c650e5a73057a5fe8d05c14dacf4d5efc2c445";
+        const f = await fetch(
+          `https://min-api.cryptocompare.com/data/price?fsym=${tickerName}&tsyms=USD&api_key=${apiKey}`
+        );
+        const data = await f.json();
+
+        this.tickers.find((t) => t.name === tickerName).price =
+          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+
+        if (this.sel?.name === tickerName) {
+          this.graph.push(data.USD);
+        }
+      }, 5000);
+    },
+
+    addTicker() {
       const currentTicker = {
         name: this.ticker,
         price: "-",
@@ -151,26 +195,8 @@ export default {
 
       this.tickers.push(currentTicker);
 
-      const apiKey =
-        "29bc7459d2f89890c58f322e34c650e5a73057a5fe8d05c14dacf4d5efc2c445";
-
-      const createdTicker = this.tickers[this.tickers.length - 1];
-
-      setInterval(async () => {
-        const f = await fetch(
-          `https://min-api.cryptocompare.com/data/price?fsym=${currentTicker.name}&tsyms=USD&api_key=${apiKey}`
-        );
-        const data = await f.json();
-
-        createdTicker.price =
-          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
-
-        if (this.sel?.name === currentTicker.name) {
-          this.graph.push(data.USD);
-        }
-      }, 5000);
-
       this.ticker = "";
+      this.subscribeToUpdates(currentTicker.name);
     },
 
     select(ticker) {
