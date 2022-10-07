@@ -81,7 +81,7 @@
           >
             <div class="px-4 py-5 sm:p-6 text-center">
               <dt class="text-sm font-medium text-gray-500 truncate">
-                {{ t.name }} - USD
+                {{ t.name.toUpperCase() }} - USD
               </dt>
               <dd class="mt-1 text-3xl font-semibold text-gray-900">
                 {{ t.price }}
@@ -112,7 +112,7 @@
       </template>
       <section v-if="sel" class="relative">
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
-          {{ sel.name }} - USD
+          {{ sel.name.toUpperCase() }} - USD
         </h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
           <div
@@ -169,6 +169,28 @@ export default {
   },
 
   methods: {
+    addTicker() {
+      const currentTicker = {
+        name: this.ticker,
+        price: "-",
+      };
+
+      const createdTicker = this.tickers.find((t) => {
+        if (t.name.toUpperCase() === currentTicker.name.toUpperCase()) {
+          return true;
+        }
+        return false;
+      });
+
+      if (!createdTicker) {
+        this.tickers.push(currentTicker);
+        this.ticker = "";
+        this.subscribeToUpdates(currentTicker.name);
+      } else {
+        this.tickerAdded = true;
+      }
+    },
+
     subscribeToUpdates(tickerName) {
       setInterval(async () => {
         const apiKey =
@@ -185,18 +207,6 @@ export default {
           this.graph.push(data.USD);
         }
       }, 5000);
-    },
-
-    addTicker() {
-      const currentTicker = {
-        name: this.ticker,
-        price: "-",
-      };
-
-      this.tickers.push(currentTicker);
-
-      this.ticker = "";
-      this.subscribeToUpdates(currentTicker.name);
     },
 
     select(ticker) {
