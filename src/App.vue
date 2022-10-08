@@ -166,7 +166,22 @@ export default {
       tickerAdded: false,
       sel: null,
       graph: [],
+      coinList: [],
     };
+  },
+
+  created() {
+    fetch(`https://min-api.cryptocompare.com/data/all/coinlist?summary=true`)
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        this.coinList.push(data);
+        console.log(this.coinList[0]);
+      })
+      .catch((error) => {
+        console.error("Failed to response: ", error);
+      });
   },
 
   methods: {
