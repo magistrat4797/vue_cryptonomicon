@@ -19,28 +19,18 @@
                 placeholder="Например DOGE"
               />
             </div>
-            <!-- <div class="flex bg-white shadow-md p-1 rounded-md flex-wrap">
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                BTC
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                DOGE
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                BCH
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                CHD
-              </span>
-            </div> -->
+            <template v-if="coinList.length">
+              <div class="flex bg-white shadow-md p-1 rounded-md flex-wrap">
+                <span
+                  v-for="c in coin"
+                  :key="c.Id"
+                  @click="addCoinToInput(c.Symbol)"
+                  class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+                >
+                  {{ c.Symbol }}
+                </span>
+              </div>
+            </template>
             <div v-if="tickerAdded" class="text-sm text-red-600">
               Такой тикер уже добавлен
             </div>
@@ -166,6 +156,7 @@ export default {
       tickerAdded: false,
       sel: null,
       graph: [],
+      coin: "",
       coinList: [],
     };
   },
@@ -177,7 +168,8 @@ export default {
       })
       .then((data) => {
         this.coinList.push(data);
-        console.log(this.coinList[0]);
+        this.coin = this.coinList[0].Data;
+        console.log(this.coin);
       })
       .catch((error) => {
         console.error("Failed to response: ", error);
@@ -205,6 +197,10 @@ export default {
       } else {
         this.tickerAdded = true;
       }
+    },
+
+    addCoinToInput(coinSymbol) {
+      this.ticker = coinSymbol.toUpperCase();
     },
 
     subscribeToUpdates(tickerName) {
@@ -242,6 +238,10 @@ export default {
         (price) => 5 + ((price - minValue) * 95) / (maxValue - minValue)
       );
     },
+
+    getSimilarCoins() {
+      
+    }
   },
 };
 </script>
